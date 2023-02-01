@@ -5,7 +5,7 @@
 
 .post-title {
     margin-bottom: 15px;
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 400;
 }
 
@@ -73,6 +73,10 @@
 .post-content a,
 .toc a:hover {
     box-shadow: 0 1px 0;
+}
+
+.post-content a {
+    color: #1775cc;
 }
 
 .post-content a code {
