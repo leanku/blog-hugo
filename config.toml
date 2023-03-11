@@ -67,6 +67,12 @@ pygmentsUseClasses = true
   Copyright = false
 
   #ICP
+  [params.Valine]
+    enabled = true
+    visitor = true
+    appId = "vTCS3InyeLMi8gWuZwJ039gt-gzGzoHsz"
+    appKey = "nhaBo7Ca9tEg1K8x4iLOm7Nn"
+
   [params.icpRecord]
     enabled = true
     icp = "陕ICP备2022003125号"

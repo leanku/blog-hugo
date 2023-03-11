@@ -48,7 +48,25 @@
     {{- if (and site.Params.ShowShareButtons (ne .Params.disableShare true)) }}
     {{- partial "share_icons.html" . -}}
     {{- end }}
+    <!-- <span id="<Your/Path/Name>" class="leancloud_visitors" data-flag-title="Your Article Title">
+      <em class="post-meta-item-text">阅读量 </em>
+      <i class="leancloud-visitors-count">1000000</i>
+    </span> -->
   </footer>
+
+  {{- if (site.Params.Valine.enabled) }}
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+    <div id="vcomments"></div>
+    <script>
+        new Valine({
+            el: '#vcomments',
+            appId: 'vTCS3InyeLMi8gWuZwJ039gt-gzGzoHsz',
+            appKey: 'nhaBo7Ca9tEg1K8x4iLOm7Nn',
+            visitor: true, // 阅读量统计
+            avatar:'robohash' // (''/mp/identicon/monsterid/wavatar/robohash/retro/hide)
+        })
+    </script>
+  {{- end}}
 
   {{- if (.Param "comments") }}
   {{- partial "comments.html" . }}
