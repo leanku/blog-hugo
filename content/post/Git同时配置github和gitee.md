@@ -11,6 +11,17 @@ keywords: ["Git"]
 
 ## 想要同时使用GitHub和Gitee，但是每次输入密码就会很麻烦。为此，本文将介绍 Git 同时配置 **github**和 **gitee** 的ssh key
 
+``` shell
+#查看git配置
+git config --global  --list
+#没配置过的话先配置用户名和邮箱信息
+git config --global user.name “username”
+git config --global user.email “email”
+#默认没有.ssh目录，
+ssh-keygen -t rsa -C "xxxxxxx@xx.com"
+#在windows下会生成.ssh目录 [c盘/用户/用户名/.ssh]
+```
+
 ### 1.  查看ssh文件
 ``` shell
 cd ~/.ssh**  
