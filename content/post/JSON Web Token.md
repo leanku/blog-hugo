@@ -7,9 +7,9 @@ tags: ["JSON Web Token","JWT"]
 keywords: ["JSON Web Token"]
 ---
 
-JSON Web Token（缩写 JWT）是目前最流行的跨域认证解决方案，本文介绍它的原理和用法。
+# JSON Web Token（缩写 JWT）是目前最流行的跨域认证解决方案，本文介绍它的原理和用法。
 
-一、跨域认证的问题
+## 一、跨域认证的问题
 互联网服务离不开用户认证。一般流程是下面这样。
 
 1、用户向服务器发送用户名和密码。
@@ -30,7 +30,7 @@ JSON Web Token（缩写 JWT）是目前最流行的跨域认证解决方案，�
 
 另一种方案是服务器索性不保存 session 数据了，所有数据都保存在客户端，每次请求都发回服务器。JWT 就是这种方案的一个代表。
 
-二、JWT 的原理
+## 二、JWT 的原理
 JWT 的原理是，服务器认证以后，生成一个 JSON 对象，发回给用户，就像下面这样。
 
 
@@ -43,10 +43,12 @@ JWT 的原理是，服务器认证以后，生成一个 JSON 对象，发回给�
 
 服务器就不保存任何 session 数据了，也就是说，服务器变成无状态了，从而比较容易实现扩展。
 
-三、JWT 的数据结构
+## 三、JWT 的数据结构
 实际的 JWT 大概就像下面这样。
 
-
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.
+TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
 
 它是一个很长的字符串，中间用点（.）分隔成三个部分。注意，JWT 内部是没有换行的，这里只是为了便于展示，将它写成了几行。
 
@@ -63,7 +65,7 @@ Header.Payload.Signature
 
 下面依次介绍这三个部分。
 
-3.1 Header
+### 3.1 Header
 Header 部分是一个 JSON 对象，描述 JWT 的元数据，通常是下面的样子。
 
 
@@ -75,7 +77,7 @@ Header 部分是一个 JSON 对象，描述 JWT 的元数据，通常是下面�
 
 最后，将上面的 JSON 对象使用 Base64URL 算法（详见后文）转成字符串。
 
-3.2 Payload
+### 3.2 Payload
 Payload 部分也是一个 JSON 对象，用来存放实际需要传递的数据。JWT 规定了7个官方字段，供选用。
 
 iss (issuer)：签发人
@@ -97,7 +99,7 @@ jti (JWT ID)：编号
 
 这个 JSON 对象也要使用 Base64URL 算法转成字符串。
 
-3.3 Signature
+### 3.3 Signature
 Signature 部分是对前两部分的签名，防止数据篡改。
 
 首先，需要指定一个密钥（secret）。这个密钥只有服务器才知道，不能泄露给用户。然后，使用 Header 里面指定的签名算法（默认是 HMAC SHA256），按照下面的公式产生签名。
@@ -109,7 +111,7 @@ HMACSHA256(
   secret)
 算出签名以后，把 Header、Payload、Signature 三个部分拼成一个字符串，每个部分之间用"点"（.）分隔，就可以返回给用户。
 
-3.4 Base64URL
+### 3.4 Base64URL
 前面提到，Header 和 Payload 串型化的算法是 Base64URL。这个算法跟 Base64 算法基本类似，但有一些小的不同。
 
 JWT 作为一个令牌（token），有些场合可能会放到 URL（比如 api.example.com/?token=xxx）。Base64 有三个字符+、/和=，在 URL 里面有特殊含义，所以要被替换掉：=被省略、+替换成-，/替换成_ 。这就是 Base64URL 算法。
@@ -123,7 +125,8 @@ JWT 作为一个令牌（token），有些场合可能会放到 URL（比如 api
 Authorization: Bearer <token>
 另一种做法是，跨域的时候，JWT 就放在 POST 请求的数据体里面。
 
-五、JWT 的几个特点
+## 五、JWT 的几个特点
+
 （1）JWT 默认是不加密，但也是可以加密的。生成原始 Token 以后，可以用密钥再加密一次。
 
 （2）JWT 不加密的情况下，不能将秘密数据写入 JWT。

@@ -1,0 +1,279 @@
+---
+title: "PHP 8 新特性"
+date: 2023-06-11T13:46:01+08:00
+draft: false
+categories: ["PHP8"]
+tags: ["PHP8"]
+keywords: ["PHP8"]
+---
+
+# PHP 8 新特性之注解功能
+
+## 注解概览 
+注解功能提供了代码中的声明部分都可以添加结构化、机器可读的元数据的能力， 注解的目标可以是类、方法、函数、参数、属性、类常量。 通过 [反射 API](https://www.php.net/manual/zh/book.reflection.php) 可在运行时获取注解所定义的元数据。 因此注解可以成为直接嵌入代码的配置式语言。
+
+通过注解的使用，在应用中实现功能、使用功能可以相互解耦。 某种程度上讲，它可以和接口（interface）与其实现（implementation）相比较。 但接口与实现是代码相关的，注解则与声明额外信息和配置相关。 接口可以通过类来实现，而注解也可以声明到方法、函数、参数、属性、类常量中。 因此它们比接口更灵活。
+
+注解使用的一个简单例子：将接口（interface）的可选方法改用注解实现。 我们假设接口 ActionHandler 代表了应用的一个操作： 部分 action handler 的实现需要 setup，部分不需要。 我们可以使用注解，而不用要求所有类必须实现 ActionHandler 接口并实现 setUp() 方法。 因此带来一个好处——可以多次使用注解。
+
+示例 #1 用注解实现接口的可选方法
+```php
+<?php
+interface ActionHandler
+{
+    public function execute();
+}
+
+#[Attribute]
+class SetUp {}
+
+class CopyFile implements ActionHandler
+{
+    public string $fileName;
+    public string $targetDirectory;
+
+    #[SetUp]
+    public function fileExists()
+    {
+        if (!file_exists($this->fileName)) {
+            throw new RuntimeException("File does not exist");
+        }
+    }
+
+    #[SetUp]
+    public function targetDirectoryExists()
+    {
+        if (!file_exists($this->targetDirectory)) {
+            mkdir($this->targetDirectory);
+        } elseif (!is_dir($this->targetDirectory)) {
+            throw new RuntimeException("Target directory $this->targetDirectory is not a directory");
+        }
+    }
+
+    public function execute()
+    {
+        copy($this->fileName, $this->targetDirectory . '/' . basename($this->fileName));
+    }
+}
+
+function executeAction(ActionHandler $actionHandler)
+{
+    $reflection = new ReflectionObject($actionHandler);
+
+    foreach ($reflection->getMethods() as $method) {
+        $attributes = $method->getAttributes(SetUp::class);
+
+        if (count($attributes) > 0) {
+            $methodName = $method->getName();
+
+            $actionHandler->$methodName();
+        }
+    }
+
+    $actionHandler->execute();
+}
+
+$copyAction = new CopyFile();
+$copyAction->fileName = "/tmp/foo.jpg";
+$copyAction->targetDirectory = "/home/user";
+
+executeAction($copyAction);
+```
+
+## 注解语法
+首先，注解声明总是以 #[ 开头，以 ] 结尾来包围。  
+
+内部则是一个或以逗号包含的多个注解。  
+
+注解的名称按 使用命名空间：基础 章节中描述，可以是非限定、限定、完全限定的名称。
+
+注解的参数是可以选的，以常见的括号()包围。 注解的参数只能是字面值或者常量表达式。   
+
+它同时接受位置参数和命名参数两种语法。
+
+示例 #1 注解语法
+```php
+<?php
+// a.php
+namespace MyExample;
+
+use Attribute;
+
+#[Attribute]
+class MyAttribute
+{
+    const VALUE = 'value';
+
+    private $value;
+
+    public function __construct($value = null)
+    {
+        $this->value = $value;
+    }
+}
+
+// b.php
+
+namespace Another;
+
+use MyExample\MyAttribute;
+
+#[MyAttribute]
+#[\MyExample\MyAttribute]
+#[MyAttribute(1234)]
+#[MyAttribute(value: 1234)]
+#[MyAttribute(MyAttribute::VALUE)]
+#[MyAttribute(array("key" => "value"))]
+#[MyAttribute(100 + 200)]
+class Thing
+{
+}
+
+#[MyAttribute(1234), MyAttribute(5678)]
+class AnotherThing
+{
+}
+```
+
+
+## 使用反射 API 读取注解
+反射 API 提供了 getAttributes() 方法， 类、方法、函数、参数、属性、类常量的反射对象可通过它获取相应的注解。 
+
+该方法返回了 [ReflectionAttribute](https://www.php.net/manual/zh/class.reflectionattribute.php) 实例的数组， 可用于查询注解名称、参数、也可以实例化一个注解。
+
+
+实例和反射注解的分离使得程序员增加了在丢失反射类、类型错误、丢失参数等情况下的处理能力，也能处理错误。 
+
+只有调用 [ReflectionAttribute::newInstance()](https://www.php.net/manual/zh/reflectionattribute.newinstance.php) 后，注解类的对象才会以验证过匹配的参数来实例化。
+
+示例 #1 通过反射 API 读取注解
+```php
+<?php
+
+#[Attribute]
+class MyAttribute
+{
+    public $value;
+
+    public function __construct($value)
+    {
+        $this->value = $value;
+    }
+}
+
+#[MyAttribute(value: 1234)]
+class Thing
+{
+}
+
+function dumpAttributeData($reflection) {
+    $attributes = $reflection->getAttributes();
+
+    foreach ($attributes as $attribute) {
+       var_dump($attribute->getName());
+       var_dump($attribute->getArguments());
+       var_dump($attribute->newInstance());
+    }
+}
+
+dumpAttributeData(new ReflectionClass(Thing::class));
+/*
+string(11) "MyAttribute"
+array(1) {
+  ["value"]=>
+  int(1234)
+}
+object(MyAttribute)#3 (1) {
+  ["value"]=>
+  int(1234)
+}
+*/
+
+// 通过传入参数：待搜索的注解类名，可返回指定的注解类， 而不需要再到反射类中迭代循环获取所有注解。
+```
+
+示例 #2 使用反射 API 读取指定的注解
+```php
+<?php
+
+function dumpMyAttributeData($reflection) {
+    $attributes = $reflection->getAttributes(MyAttribute::class);
+
+    foreach ($attributes as $attribute) {
+       var_dump($attribute->getName());
+       var_dump($attribute->getArguments());
+       var_dump($attribute->newInstance());
+    }
+}
+
+dumpMyAttributeData(new ReflectionClass(Thing::class));
+
+```
+
+
+## 声明注解类
+虽然没有严格要求，推荐为每个注解创建一个实际的类。 在这个最简单的例子中，通过 use 语法从全局命名空间引入 #[Attribute] 注解所需要全空的类。
+
+示例 #1 简单的 Attribute 类
+```php
+<?php
+
+namespace Example;
+
+use Attribute;
+
+#[Attribute]
+class MyAttribute
+{
+}
+
+```
+
+要限制指定注解的声明类型，可为 #[Attribute] 注解第一个参数传入字节位掩码设置。
+
+示例 #2 目标限定使用的注解
+```php
+<?php
+
+namespace Example;
+
+use Attribute;
+
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
+class MyAttribute
+{
+}
+
+```
+
+在另一个类型中声明 MyAttribute 会在调用 [ReflectionAttribute::newInstance()](https://www.php.net/manual/zh/reflectionattribute.newinstance.php) 时抛出异常。
+可以指定以下目标：
+* Attribute::TARGET_CLASS
+* Attribute::TARGET_FUNCTION
+* Attribute::TARGET_METHOD
+* Attribute::TARGET_PROPERTY
+* Attribute::TARGET_CLASS_CONSTANT
+* Attribute::TARGET_PARAMETER
+* Attribute::TARGET_ALL
+
+注解在每个声明中默认情况下只能使用一次。 如果需要重复，可以在 #[Attribute] 声明中设置字节位掩码。
+
+示例 #3 使用 IS_REPEATABLE 允许注解在声明中出现多次
+```php
+<?php
+
+namespace Example;
+
+use Attribute;
+
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION | Attribute::IS_REPEATABLE)]
+class MyAttribute
+{
+}
+
+```
+
+
+
+
+参考文章： [PHP: 注解 - Manual ](https://www.php.net/manual/zh/language.attributes.php)
