@@ -32,7 +32,7 @@ keywords: ["Kong","API网关","微服务"]
 * 数据库集成postgresSQL
 
 ## Kong 流程图
-![Alt text](../../static/images/kong.png)
+![Kong流程图](http://resources.leanku.com/kong.png)
 
 
 ## Kong 安装

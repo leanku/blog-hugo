@@ -34,7 +34,7 @@ keywords: ["consul","注册中心","微服务"]
 |8600|8600端口作为DNS服务器，它使得我们可以通过节点名查询节点的信息。|
 
 ## Consul 工作原理
-![Alt text](../../static/images/consul.png)
+![consul工作原理](http://resources.leanku.com/consul.png)
 
 
 
