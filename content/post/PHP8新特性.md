@@ -12,19 +12,28 @@ keywords: ["PHP8"]
 ## 命名参数
 新增命名参数的功能:
 
+在函数或方法调用时，可通过参数名来指定参数的值，而不仅仅依赖参数的位置
+
 从 PHP 8.0.0 开始，函数参数列表可以包含一个尾部的逗号，这个逗号将被忽略。这在参数列表较长或包含较长的变量名的情况下特别有用，这样可以方便地垂直列出参数。
 ```php
 <?php
 function takes_many_args(
     $first_arg,
     $second_arg,
-    $a_very_long_argument_name,
-    $arg_with_default = 5,
     $again = 'a default string', // 在 8.0.0 之前，这个尾部的逗号是不允许的。
-)
-{
-    // ...
+){
+  // ...
 }
+z
+takes_many_args(1, 2);                       //按照参数顺序传参
+takes_many_args(first_arg:1, second_arg:2);  //指定参数，不分顺序
+
+// 类也可以使用命名参数，假设Demo类构造函数有$first_arg，$second_arg,两个参数，有takes_many_args方法
+$demo = new Demo(first_arg:1, second_arg:2);  
+$demo->takes_many_args(first_arg:1, second_arg:2);
+
+// 不能用位置的参数和命名的参数一起
+// 可选参数必须在必选参数后面 例如上面的$again
 ?>
 ```
 
@@ -76,6 +85,7 @@ public function foo(Foo|null $foo): void;
 public function bar(?Bar $bar): void;
 ```
 
+
 ## Match 表达式
 新增 [match](https://www.php.net/manual/zh/control-structures.match.php) 表达式。
 : match 表达式基于值的一致性进行分支计算。 match表达式和 switch 语句类似， 都有一个表达式主体，可以和多个可选项进行比较。 与 switch 不同点是，它会像三元表达式一样求值。 与 switch 另一个不同点，它的比较是严格比较（ ===）而不是松散比较（==）。 Match 表达式从 PHP 8.0.0 起可用。
@@ -112,6 +122,50 @@ if (is_null($repository)) {
 // 仅当 null 被认为是属性或方法返回的有效和预期的可能值时，才推荐使用 nullsafe 操作符。如果业务中需要明确指示错误，抛出异常会是更好的处理方式。
 ?>
 ```
+
+## 只读属性 readonly
+只读属性不能在初始化后更改，对属性的任何赋值和修改都会导致Error异常。 
+
+不支持对静态属性只读。
+
+``` php
+<?php
+class Test
+{
+  public readonly string $name;
+
+  public function __construct(string $name){
+    $this->name = $name;
+  }
+
+  public function setName(string $name){
+    $this->name = $name
+  }
+
+  $test = new Test('a');
+  var_dump($test->name);    // 输出a
+  $test->name = 'b';
+   var_dump($test->name);   // 报错
+  $test->setName('c');
+   var_dump($test->name);   // 报错
+}
+```
+
+只读属性只能初始化一次，并且只能从声明它的作用域内初始化，但并不一定是构造函数内。  
+例如上面例子 注释掉构造函数直接调用setName方法
+
+禁止在只读属性上指定默认值，因为具有默认值的只读属性等同于常量
+
+只读属性一旦初始化就不能unset()
+
+只读属性并不会妨碍内部可变性。存储在只读属性中的对象或资源仍然可以在内部修改
+
+## 注解
+[PHP8新特性 ：注解](./PHP8新特性%20：注解.md)
+
+## 枚举 
+[PHP8新特性 ：注解](./PHP8新特性%20：注解.md)
+
 
 ## 其他新特性
 * 新增 [WeakMap](https://www.php.net/manual/zh/class.weakmap.php) 类。
