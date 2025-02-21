@@ -1,5 +1,5 @@
 ---
-title: "ElasticSearch"
+title: "PHP的 FPM 和 CLI "
 date: 2024-02-17T20:46:01+08:00
 draft: false
 categories: ["PHP"]

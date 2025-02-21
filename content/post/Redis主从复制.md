@@ -74,8 +74,97 @@ Redis的增量复制是指在初始化的全量复制并开始正常工作之后
     repl-diskless-sync ：是否开启无磁盘复制
     repl-diskless-sync-delay：等待一定时长再开始复制，因为要等更多slave重新连接过来
 
+##  三、Redis 主从复制的配置步骤
 
-## 三、主从复制的其他问题
+### 步骤 1：安装 Redis
+
+首先，你需要在主节点和从节点上安装 Redis。
+
+假设你已经安装了 Redis，可以通过以下命令检查 Redis 是否安装成功：
+``` bash
+redis-server --version
+```
+
+### 步骤 2：配置主节点（Master）
+1. 找到 Redis 配置文件 redis.conf，在主节点上不需要做特别的配置，默认情况下 Redis 会充当主节点。
+2. 启动 Redis 实例：
+   ```
+   redis-server /path/to/redis.conf
+   ```
+主节点的配置通常不需要做任何改动，除非你有特定需求。
+
+### 步骤 3：配置从节点（Slave）
+1. 找到 Redis 配置文件 redis.conf，将从节点配置成复制模式。
+2. 在从节点的 redis.conf 中添加以下配置项：
+   ``` bash
+   slaveof <master-ip> <master-port>
+   ```
+   例如，如果主节点 IP 是 192.168.1.100，端口是 6379，则配置如下：
+   ```
+   slaveof 192.168.1.100 6379
+   ```
+3. 启动 Redis 实例作为从节点：
+   ``` bash
+   redis-server /path/to/slave-redis.conf
+   ```
+   如果从节点的配置文件中已经设置了 slaveof，则它会自动连接到主节点并开始同步数据。
+
+### 步骤 4：验证主从复制是否生效
+在主节点上，可以执行以下命令来查看从节点信息：
+``` bash
+redis-cli -h <master-ip> -p 6379 info replication
+```
+这会返回主节点的复制信息，类似于：
+``` bash
+role:master
+connected_slaves:1
+slave0:ip=192.168.1.101,port=6379,state=online,offset=12345,lag=1
+```
+connected_slaves 表示当前连接的从节点数，slave0 表示从节点的 IP 地址、端口、状态、同步偏移量等信息。
+
+在从节点上，你可以通过以下命令查看其状态：
+``` bash
+redis-cli -h <slave-ip> -p 6379 info replication
+```
+输出类似于：
+``` bash
+role:slave
+master_host:192.168.1.100
+master_port:6379
+master_link_status:up
+master_last_io_seconds_ago:5
+slave_repl_offset:12345
+```
+这表示从节点正在成功地从主节点同步数据。
+
+### 测试主从复制
+1. 写入数据到主节点： 在主节点上使用 SET 命令写入数据：
+   ``` bash
+   redis-cli -h 192.168.1.100 -p 6379 SET mykey "Hello, Redis!"
+   ```
+2. 读取数据从从节点： 你可以从从节点读取数据，验证主从同步：
+``` bash
+redis-cli -h 192.168.1.101 -p 6379 GET mykey
+```
+如果主从复制正常工作，应该可以看到从节点返回的值为 Hello, Redis!。
+
+#### 执行读写分离操作
+在 PHP 中，你可以基于当前操作来选择使用主节点（写操作）或者从节点（读操作）。例如：
+``` php
+// 写操作，使用主节点
+$redis = new Redis();
+$redis->connect('192.168.1.100', 6379);  // 主节点 IP 和端口
+$redis->set('name', 'John Doe');
+
+// 读操作，使用从节点
+$redis = new Redis();
+$redis->connect('192.168.1.101', 6379);  // 从节点 IP 和端口
+$value = $redis->get('name');
+echo $value;  // 应该输出 "John Doe"
+
+```
+
+## 四、主从复制的其他问题
 1. 主从复制的特点：
    1. Redis使用异步复制，每次接收到写命令之后，先在内部写入数据，然后异步发送给slave服务器。但从Redis 2.8开始，从服务器会周期性的应答从复制流中处理的数据量。
    2. Redis主从复制不阻塞master服务器。也就是说当若干个从服务器在进行初始同步时，主服务器仍然可以处理外界请求。
@@ -93,12 +182,11 @@ Redis的增量复制是指在初始化的全量复制并开始正常工作之后
    
    对于slave服务器上过期键的处理，主要是有master服务器负责。如果master过期了一个key，则由master服务器负责键的过期删除处理，然后将相关删除命令以数据同步的方式同步给slave服务器，slave服务器根据删除命令删除本地的key。
 
-## 四、Redis的高可用:
+## 五、Redis的高可用:
 前面说过，通过主从复制，如果master服务器宕机了，可以提升一个slave服务器作为新的master服务器，实现故障的转移，实现高可用。也就是说，当master宕掉之后，可以手动执行“SLAVEOF no one”命令，重新选择一台服务器作为master服务器。但是呢，我们总不能保证每次master宕掉之后，都可以及时察觉并手动执行该命令，这时就可以使用“哨兵模式sentinel”，哨兵模式其实就是“SLAVEOF no one”命令的自动版，能够后台监控master是否故障，如果故障了，则根据投票数自动将slave转换为master，如果之前的master重启回来，不会造成双master冲突，因为原本的master会变成slave。
 
     配置步骤：
     1. 在自定义的/myredis目录下新建sentinel.conf文件（名字绝不能错）。
     2. 配置哨兵，在配置文件中写： sentinel monitor 被监控数据库名字 127.0.0.1 6379 1 最后的数字1，表示主机挂掉后salve投票看让谁接替成为主机，得票数多少后成为主机。
     3. 启动哨兵：redis-sentinel /myredis/sentinel.conf
-
-[原文](https://blog.csdn.net/a745233700/article/details/112404218)
+   
