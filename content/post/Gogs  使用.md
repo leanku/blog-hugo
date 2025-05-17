@@ -1,13 +1,13 @@
 ---
-title: "基于 Gogs + Drone + Harbor + Docker 的自动化部署方案"
+title: "Gogs 使用指南"
 date: 2025-05-11T13:46:01+08:00
 draft: false
-categories: ["git"]
-tags: ["Git"]
-keywords: ["Git"]
+categories: ["Gogs"]
+tags: ["Gogs"]
+keywords: ["Gogs"]
 ---
 
-# 基于 Gogs + Drone + Harbor + Docker 的自动化部署方案
+# Gogs 使用
 
 ## 1. 什么是 Gogs?
     Gogs 是一款极易搭建的自助 Git 服务。

@@ -1,5 +1,5 @@
 ---
-title: "K3s使用指南 +Rancher"
+title: "K3s使用指南"
 date: 2025-05-12T21:46:01+08:00
 draft: false
 categories: ["DevOps"]
