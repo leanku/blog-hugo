@@ -68,3 +68,17 @@ ssh -T git@github.com
 # 配置成功 正常会输出如下
 Hi leanku! You've successfully authenticated, but GitHub does not provide shell access.
 ```
+### 8. 已经配置了 SSH 密钥，但在 git push 时仍然要求输入用户名和密码
+检查远程 URL,如果显示 https://...，说明 Git 仍然在使用 HTTPS 方式。
+```
+git remote -v
+```
+修改为 SSH URL,leanku/php-msf-docker项目为例
+```
+git remote set-url origin git@github.com:leanku/php-msf-docker.git
+```
+再次检查，输出应为
+```
+origin  git@github.com:leanku/php-msf-docker.git (fetch)
+origin  git@github.com:leanku/php-msf-docker.git (push)
+```
