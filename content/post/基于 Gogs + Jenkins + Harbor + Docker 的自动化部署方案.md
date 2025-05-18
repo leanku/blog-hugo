@@ -104,8 +104,7 @@ Jenkins 示例：
     ```
 
 ### 4.4 Jenkins Pipeline设计
-```
-// 自定义 Bark 通知方法
+``` Groovy
 
 def getTriggerUser() {
     def causes = currentBuild.getBuildCauses()
