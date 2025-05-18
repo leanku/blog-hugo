@@ -44,6 +44,11 @@ git push --all gitee
 git pull gitee master
 ```
 
+## 删除指定的远程仓库（如 gitee）
+```bash
+git remote remove gitee
+```
+
 ## 注意事项：
 1. 两个仓库的分支结构最好保持一致
 2. 如果两边都有新的提交，可能需要先合并再推送
