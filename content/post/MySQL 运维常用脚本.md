@@ -12,7 +12,7 @@ keywords: ["MySQL"]
 
 1.导出整个数据库  
   
-``` mysql
+```sql
 
 #mysqldump -u 用户名 -p –default-character-set=latin1 数据库名 > 导出的文件名(数据库默认编码是latin1)    
 
@@ -21,7 +21,7 @@ mysql dump -u wcnc -p smgp_apps_wcnc > wcnc.sql  
 
 2.导出一个表  
 
-``` mysql
+``` sql
 #mysqldump -u 用户名 -p 数据库名 表名> 导出的文件名 
 
 mysql dump -u wcnc -p smgp_apps_wcnc users> wcnc_users.sql
@@ -30,14 +30,14 @@ mysql dump -u wcnc -p smgp_apps_wcnc users> wcnc_users.sql
 
 3.导出一个数据库结构  
 
-``` mysql
+``` sql
 mysql dump -u wcnc -p -d –add-drop-table smgp_apps_wcnc >d:wcnc_db.sql
 
 #-d 没有数据 –add-drop-table 在每个create语句之前增加一个drop table
 ```
 
 4.导入数据库  
-``` mysql
+``` sql
 #A:常用source 命令    
 #进入mysql数据库控制台，    如
 mysql -u root -p     
@@ -62,7 +62,7 @@ mysql -u username -p -D dbname < filename.sql
 
 1、创建数据库  
 
-``` mysql
+``` sql
 #命令：create database <数据库名>  
 
 #例如：建立一个名为sqlroad的数据库  
@@ -72,7 +72,7 @@ mysql> create database sqlroad;  
 
 2、显示所有的数据库  
 
-``` mysql
+``` sql
 #命令：show databases （注意：最后有个s）  
 
 mysql> show databases;  
@@ -80,7 +80,7 @@ mysql> show databases;  
 
 3、删除数据库  
 
-``` mysql
+``` sql
 #命令：drop database <数据库名>  
 
 #例如：删除名为 sqlroad的数据库  
@@ -90,7 +90,7 @@ mysql> drop database sqlroad;  
 
 4、连接数据库  
 
-``` mysql
+``` sql
 #命令：use <数据库名>  
 
 #例如：如果sqlroad数据库存在，尝试存取它： 
@@ -102,13 +102,13 @@ mysql> use sqlroad;  
 
 5、查看当前使用的数据库  
 
-``` mysql
+``` sql
 mysql> select database();  
 ```
 
 6、当前数据库包含的表信息： 
 
-``` mysql
+``` sql
 mysql> show tables; 
 #（注意：最后有个s）  
 ```
@@ -119,7 +119,7 @@ mysql> show tables;
 
 1、建表  
   
-``` mysql
+``` sql
 #命令：create table <表名> ( <字段名> <类型> [,..<字段名n> <类型n>]);  
 mysql> create table class(  
 > id int(4) not null primary key auto_increment,
@@ -131,7 +131,7 @@ mysql> create table class(  
 
 2、获取表结构  
 
-``` mysql
+``` sql
 #命令：desc 表名，或者show columns from 表名
 mysql>DESCRIBE class;
 mysql> desc class;
@@ -140,7 +140,7 @@ mysql> show columns from class;  
 
 3、删除表  
 
-``` mysql
+``` sql
 #命令：drop table <表名>
 #例如：删除表名为 class 的表
 mysql> drop table class;
@@ -148,7 +148,7 @@ mysql> drop table class;
 
 4、插入数据  
 
-``` mysql
+``` sql
 #命令：insert into <表名> [( <字段名>[,..<字段名n> ])] values ( 值 )[, ( 值n )]
 #例如，往表 class中插入二条记录, 这二条记录表示：编号为1的名为Tom的成绩为96.45, 编号为2的名为Joan 的成绩为82.99，编号为3的名为Wang 的成绩为96.59 
 mysql> insert into class values(1,’Tom’,96.45),(2,’Joan’,82.99), (3,’Wang’, 96.59);  
@@ -156,7 +156,7 @@ mysql> insert into class values(1,’Tom’,96.45),(2,’Joan’,82.99), (3
 
 5、查询表中的数据  
 
-``` mysql
+``` sql
 #查询所有行 命令：select <字段，字段，...> from < 表名 > where < 表达式 >
 #例如：查看表 class 中所有数据
 mysql> select * from calss; 
@@ -166,7 +166,7 @@ mysql> select * from class order by id limit 0,2;   mysql> select * 
 
 6、删除表中数据  
 
-``` mysql
+``` sql
 #命令：delete from 表名 where 表达式  
 #例如：删除表 class 的记录
 mysql> delete from calss where id=1; 
@@ -174,13 +174,13 @@ mysql> delete from calss where id=1; 
   
 7、修改表中数据：update 表名 set 字段=新值,…where 条件  
 
-``` mysql
+``` sql
 mysql> update class set name='Mary' where id=1;
 ```
 
 8、在表中增加字段： 
 
-``` mysql
+``` sql
 #命令：alter table 表名 add字段 类型 其他;
 #例如：在表class中添加了一个字段passtest，类型为int(4)，默认值为空
 mysql> alter table class add passtest int(4) default '';
@@ -188,7 +188,7 @@ mysql> alter table class add passtest int(4) default '';
 
 9、更改表名： 
 
-``` mysql
+``` sql
 #命令：rename table 原表名 to 新表名;
 #例如：在表class名字更改为class_a
 mysql> rename table class to class_a;
@@ -215,7 +215,7 @@ update article set content=concat('',content);
 
 7.导入数据库表  
 
-``` mysql
+``` sql
 #创建.sql文件
 #先产生一个库如auction.
 >mysqladmin -u root -p create auction
@@ -227,7 +227,7 @@ update article set content=concat('',content);
 
 8．修改数据库  
 
-``` mysql
+``` sql
 #在mysql的表中增加字段：
 alter table dbname add column userid int(11) not null primary key auto_increment;
 #这样，就在表dbname中添加了一个字段userid，类型为int(11)
@@ -235,7 +235,7 @@ alter table dbname add column userid int(11) not null primary key aut
 
 9．mysql数据库的授权  
 
-``` mysql
+``` sql
 mysql>grant select,insert,delete,create,drop on *.* (或test.*/user.*/..) to 用户名@localhost identified by ‘密码’；
 #如：新建一个用户帐号以便可以访问数据库，需要进行如下操作：
 mysql> grant usage　
@@ -257,56 +257,56 @@ mysql> exit
 
 1:使用SHOW语句找出在服务器上当前存在什么数据库： 
 
-``` mysql
+``` sql
 mysql> SHOW DATABASES;  
 ```
 
 2、创建一个数据库MYSQLDATA  
 
-``` mysql
+``` sql
 mysql> Create DATABASE MYSQLDATA;  
 ```
 
 3:选择你所创建的数据库  
 
-``` mysql
+``` sql
 mysql> USE MYSQLDATA;
 # (按回车键出现Database changed 时说明操作成功！)  
 ```
 
 4:查看现在的数据库中存在什么表  
 
-``` mysql
+``` sql
 mysql> SHOW TABLES;  
 ```
 
 5:创建一个数据库表  
 
-``` mysql
+``` sql
 mysql> Create TABLE MYTABLE (name VARCHAR(20), sex CHAR(1));  
 ```
 
 6:显示表的结构： 
 
-``` mysql
+``` sql
 mysql> DESCRIBE MYTABLE;  
 ```
 
 7:往表中加入记录  
 
-``` mysql
+``` sql
 mysql> insert into MYTABLE values (“hyq”,”M”);  
 ```
 
 8:用文本方式将数据装入数据库表中（例如D:/mysql.txt）  
 
-``` mysql
+``` sql
 mysql> LOAD DATA LOCAL INFILE “D:/mysql.txt”INTO TABLE MYTABLE;  
 ```
 
 9:导入.sql文件命令（例如D:/mysql.sql）  
 
-``` mysql
+``` sql
 mysql>use database;  
 
 mysql>source d:/mysql.sql;  
@@ -314,18 +314,18 @@ mysql>source d:/mysql.sql;  
 
 10:删除表  
 
-``` mysql
+``` sql
 mysql>drop TABLE MYTABLE;  
 ```
 
 11:清空表  
 
-``` mysql
+``` sql
 mysql>delete from MYTABLE;  
 ```
 
 12:更新表中数据  
 
-``` mysql
+``` sql
 mysql>update MYTABLE set sex=”f”where name=’hyq’;
 ```
