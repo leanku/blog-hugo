@@ -1,7 +1,7 @@
 ---
 title: "PHP8新特性：JIT"
 date: 2025-06-22T20:46:01+08:00
-draft: true
+draft: false
 categories: ["PHP"]
 tags: ["JIT"]
 keywords: ["JIT"]

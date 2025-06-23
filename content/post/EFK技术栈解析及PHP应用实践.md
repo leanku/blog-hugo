@@ -1,7 +1,7 @@
 ---
 title: "EFK技术栈解析及PHP应用实践"
-date: 2025-06-22T20:46:01+08:00
-draft: true
+date: 2025-06-22T20:49:01+08:00
+draft: false
 categories: ["DevOps"]
 tags: ["EFK","DevOps"]
 keywords: ["EFK","DevOps"]
