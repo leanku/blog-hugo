@@ -1,6 +1,6 @@
 ---
 title: "Mysql 简易安装"
-date: 2025-05-11T13:46:01+08:00
+date: 2024-05-11T13:46:01+08:00
 draft: false
 categories: ["Mysql"]
 tags: ["Mysql"]
@@ -61,29 +61,65 @@ sudo firewall-cmd --reload
 ```
 MySQL 配置文件通常位于 /etc/my.cnf 或 /etc/mysql/my.cnf。
 
-## 使用 systemd服务单元文件来管理
-1. 创建编辑一个服务单元文件
-    ``` bash
-    vim /etc/systemd/system/gogs.service
-    ```
-2. 在文件中添加以下内容：
-    ``` bash
-    [Unit]
-    Description=Gogs Server
-    After=network.target
+## MySQL优化
+### MySQL配置优化
+编辑/etc/my.cnf或/etc/mysql/my.cnf，添加/修改以下参数：
+```ini
+[mysqld]
+# 基础配置 内存配置
+# InnoDB缓冲池大小（推荐为总内存的50-70%）
+innodb_buffer_pool_size = 1G
+# InnoDB日志文件大小（推荐为缓冲池的25%）
+innodb_log_file_size = 256M
+# InnoDB日志缓冲区大小
+innodb_log_buffer_size = 16M
+# 查询排序缓冲区大小
+sort_buffer_size = 2M
+read_buffer_size = 2M
+read_rnd_buffer_size = 2M
+join_buffer_size = 4M
 
-    [Service]
-    ExecStart=/path/gogs web
-    Restart=always
-    User=your_username
-    Group=your_groupname
+# InnoDB引擎优化
+# I/O配置
+innodb_flush_method = O_DIRECT
+innodb_io_capacity = 1000
+innodb_io_capacity_max = 2000
+# 并发控制
+innodb_thread_concurrency = 0
+innodb_read_io_threads = 8
+innodb_write_io_threads = 8
+# 事务日志
+innodb_flush_log_at_trx_commit = 1  # 需要最高耐久性时设为1，性能要求高时可设为2
+sync_binlog = 1
 
-    [Install]
-    WantedBy=multi-user.target
-    ```
-    把 /path 替换成实际的文件路径，把 your_username 和 your_groupname 替换成实际的用户名和用户组名。
+# 连接相关
+# 最大连接数（根据应用需求调整）
+max_connections = 50
+# 线程缓存大小
+thread_cache_size = 10
+# 表缓存
+table_open_cache = 2000
+table_definition_cache = 1000
 
-3. 执行systemctl命令
-    ``` bash
-    # 重新加载 systemd 管理器配置
-    sudo systemctl daemon-reload
+# 查询优化
+# query_cache_type = 0  # MySQL 8已移除查询缓存
+tmp_table_size = 32M
+max_heap_table_size = 32M
+```
+
+### 系统级优化
+```bash
+# 调整文件描述符限制
+echo "* soft nofile 65535" >> /etc/security/limits.conf
+echo "* hard nofile 65535" >> /etc/security/limits.conf
+
+# 内核参数优化
+echo "vm.swappiness = 10" >> /etc/sysctl.conf
+echo "vm.dirty_ratio = 60" >> /etc/sysctl.conf
+echo "vm.dirty_background_ratio = 5" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_max_syn_backlog = 65535" >> /etc/sysctl.conf
+sysctl -p
+```
+
+重启，如出现错误检查日志
+sudo cat /var/log/mysql/error.log
